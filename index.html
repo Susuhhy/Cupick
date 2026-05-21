@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cupick</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --coffee-dark: #2C1810;
+    --coffee-medium: #6F4E37;
+    --coffee-light: #C8A882;
+    --coffee-cream: #F5EDD8;
+    --coffee-pale: #FAF6EE;
+    --coffee-warm: #E8D5B7;
+    --text-primary: #1A0F08;
+    --text-secondary: #6B5044;
+    --text-muted: #A08878;
+    --border: #DDD0BC;
+    --border-light: #EDE4D4;
+    --white: #FEFCF8;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--coffee-pale); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
+
+  /* HEADER */
+  header { background: var(--coffee-dark); color: var(--coffee-cream); padding: 0 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(44,24,16,0.3); }
+  .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 1rem; }
+  .logo { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+  .logo-icon { width: 28px; height: 28px; background: var(--coffee-medium); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo-text { font-family: 'Noto Serif KR', serif; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+  .header-search { flex: 1; max-width: 400px; position: relative; }
+  .header-search input { width: 100%; padding: 0.5rem 1rem 0.5rem 2.5rem; border-radius: 100px; border: 1px solid rgba(200,168,130,0.3); background: rgba(255,255,255,0.08); color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; outline: none; transition: all 0.2s; }
+  .header-search input::placeholder { color: rgba(200,168,130,0.5); }
+  .header-search input:focus { border-color: var(--coffee-light); background: rgba(255,255,255,0.12); }
+  .header-search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--coffee-light); font-size: 13px; pointer-events: none; }
+  .header-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+  .count-badge { font-size: 12px; color: var(--coffee-light); white-space: nowrap; }
+  .view-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 3px; }
+  .view-btn { width: 30px; height: 30px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(200,168,130,0.6); transition: all 0.15s; font-size: 14px; }
+  .view-btn.active { background: rgba(111,78,55,0.8); color: var(--coffee-cream); }
+
+  /* MAIN LAYOUT */
+  .app-body { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 220px 1fr; gap: 0; min-height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar { background: var(--white); border-right: 1px solid var(--border-light); padding: 1.5rem 1.25rem; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .filter-section { margin-bottom: 1.5rem; }
+  .filter-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.6rem; display: block; }
+
+  /* Region two-step select */
+  .region-step { display: flex; flex-direction: column; gap: 6px; }
+  .region-select { width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--coffee-pale); color: var(--text-primary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A08878' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.6rem center; padding-right: 2rem; transition: border-color 0.15s; }
+  .region-select:focus { border-color: var(--coffee-medium); }
+  .region-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .tag-group { display: flex; flex-direction: column; gap: 4px; }
+  .tag-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; text-align: left; width: 100%; }
+  .tag-btn:hover { background: var(--coffee-cream); }
+  .tag-btn.on { background: var(--coffee-dark); color: var(--coffee-cream); }
+  .tag-btn .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coffee-light); flex-shrink: 0; }
+  .reset-btn { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; margin-top: 1rem; }
+  .reset-btn:hover { background: var(--coffee-cream); color: var(--text-secondary); border-color: var(--coffee-light); }
+  .divider { height: 1px; background: var(--border-light); margin: 1.25rem 0; }
+
+  /* CONTENT */
+  .content { padding: 1.25rem 1.5rem; min-height: 100%; }
+  .content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .active-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .active-chip { display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; background: var(--coffee-dark); color: var(--coffee-cream); font-size: 11px; font-weight: 500; }
+  .active-chip-remove { cursor: pointer; opacity: 0.7; font-size: 12px; line-height: 1; transition: opacity 0.15s; }
+  .active-chip-remove:hover { opacity: 1; }
+
+  /* GRID */
+  .cafe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .cafe-grid.list-view { grid-template-columns: 1fr; }
+
+  /* CARD */
+  .card { background: var(--white); border: 1px solid var(--border-light); border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.55rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; animation: fadeIn 0.2s ease both; }
+  .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--coffee-light); opacity: 0; transition: opacity 0.2s; border-radius: 12px 0 0 12px; }
+  .card:hover { border-color: var(--coffee-light); box-shadow: 0 4px 20px rgba(111,78,55,0.1); transform: translateY(-1px); }
+  .card:hover::before { opacity: 1; }
+  .cafe-grid.list-view .card { flex-direction: row; align-items: flex-start; gap: 1rem; padding: 0.85rem 1.1rem; }
+  .cafe-grid.list-view .card-main { flex: 1; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+  .cafe-name { font-family: 'Noto Serif KR', serif; font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.4; word-break: keep-all; }
+  .region-chip { font-size: 10px; padding: 2px 8px; border-radius: 100px; background: var(--coffee-cream); color: var(--coffee-medium); font-weight: 500; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--coffee-warm); }
+  .cafe-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .cafe-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 100px; background: var(--coffee-pale); color: var(--text-secondary); border: 1px solid var(--border-light); font-weight: 400; }
+  .tag.highlight { background: #FFF3E0; color: #8B5E3C; border-color: #F0D9BE; }
+
+  /* EMPTY */
+  .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; color: var(--text-muted); gap: 0.75rem; }
+  .empty-icon { font-size: 2.5rem; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  /* MOBILE FILTER */
+  .mobile-filter-bar { display: none; position: sticky; top: 60px; z-index: 80; background: var(--white); border-bottom: 1px solid var(--border-light); padding: 0.75rem 1rem; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .mobile-filter-toggle { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 100px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .mobile-filter-toggle:hover, .mobile-filter-toggle.has-filter { background: var(--coffee-dark); color: var(--coffee-cream); border-color: var(--coffee-dark); }
+
+  /* MOBILE DRAWER */
+  .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; }
+  .mobile-overlay.open { display: block; }
+  .mobile-drawer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-radius: 20px 20px 0 0; padding: 1.5rem 1.25rem; max-height: 80vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 201; }
+  .mobile-drawer.open { transform: translateY(0); }
+  .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 1.25rem; }
+  .drawer-title { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 1.25rem; }
+  .drawer-section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.6rem; display: block; }
+  .drawer-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+  .drawer-tag-btn { padding: 0.4rem 0.85rem; border-radius: 100px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .drawer-tag-btn.on { background: var(--coffee-dark); color: var(--coffee-cream); border-color: var(--coffee-dark); }
+  .drawer-footer { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+  .drawer-reset { flex: 1; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; }
+  .drawer-apply { flex: 2; padding: 0.75rem; border-radius: 10px; border: none; background: var(--coffee-dark); color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) { .app-body { grid-template-columns: 1fr; } .sidebar { display: none; } .mobile-filter-bar { display: flex; } .content { padding: 1rem; } }
+  @media (max-width: 600px) { .cafe-grid { grid-template-columns: 1fr; } .header-inner { gap: 0.5rem; } .header-search { max-width: none; } .count-badge { display: none; } .view-toggle { display: none; } .content-header { display: none; } }
+  @media (max-width: 380px) { header { padding: 0 0.75rem; } .logo-text { display: none; } }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ADD CAFE BUTTON */
+  .add-cafe-btn { display: flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 100px; border: 1px solid var(--coffee-light); background: transparent; color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .add-cafe-btn:hover { background: var(--coffee-medium); border-color: var(--coffee-medium); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: block; }
+  .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.96); width: min(560px, calc(100vw - 2rem)); max-height: calc(100vh - 3rem); background: var(--white); border-radius: 16px; box-shadow: 0 20px 60px rgba(44,24,16,0.2); display: flex; flex-direction: column; z-index: 301; opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.34,1.2,0.64,1); }
+  .modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem 1rem; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+  .modal-title { font-family: 'Noto Serif KR', serif; font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--coffee-pale); color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .modal-close:hover { background: var(--coffee-warm); color: var(--text-primary); }
+  .modal-body { padding: 1.25rem 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.01em; }
+  .required { color: var(--coffee-medium); }
+  .form-input { padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background: var(--coffee-pale); color: var(--text-primary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; width: 100%; }
+  .form-input:focus { border-color: var(--coffee-medium); background: var(--white); }
+  .form-input::placeholder { color: var(--text-muted); }
+  .form-textarea { resize: vertical; min-height: 70px; }
+  .modal-tag-groups { display: flex; flex-direction: column; gap: 0.5rem; }
+  .modal-tag-group-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem; }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modal-tag-btn { padding: 0.35rem 0.8rem; border-radius: 100px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .modal-tag-btn.on { background: var(--coffee-dark); color: var(--coffee-cream); border-color: var(--coffee-dark); }
+  .form-error { font-size: 12px; color: #c0392b; min-height: 16px; }
+  .modal-footer { display: flex; gap: 0.5rem; padding: 1rem 1.5rem 1.25rem; border-top: 1px solid var(--border-light); flex-shrink: 0; }
+  .modal-cancel { flex: 1; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .modal-cancel:hover { background: var(--coffee-pale); }
+  .modal-submit { flex: 2; padding: 0.7rem; border-radius: 10px; border: none; background: var(--coffee-dark); color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .modal-submit:hover { background: var(--coffee-medium); }
+  .modal-submit:active { transform: scale(0.98); }
+  .card.user-added { border-color: var(--coffee-warm); }
+  .card.duksung { border-color: #B8D4E8; }
+  .duksung-badge { display: inline-flex; align-items: center; font-size: 11px; padding: 2px 8px; border-radius: 100px; background: #EBF4FB; color: #4A86B8; border: 1px solid #B8D4E8; font-weight: 500; margin-bottom: 4px; align-self: flex-start; }
+
+  /* FOLDER BUTTON */
+  .folder-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; text-align: left; width: 100%; }
+  .folder-btn:hover { background: var(--coffee-cream); }
+  .folder-btn.on { background: #EBF4FB; color: #2E6DA4; font-weight: 500; }
+  .folder-icon { font-size: 14px; flex-shrink: 0; }
+  .folder-count { margin-left: auto; font-size: 10px; color: var(--text-muted); background: var(--coffee-pale); padding: 1px 6px; border-radius: 100px; }
+  .folder-btn.on .folder-count { background: #D0E8F5; color: #2E6DA4; }
+
+  /* MOBILE FOLDER CHIP */
+  .mobile-folder-chip { display: flex; align-items: center; gap: 4px; padding: 0.35rem 0.75rem; border-radius: 100px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .mobile-folder-chip.on { background: #EBF4FB; color: #2E6DA4; border-color: #B8D4E8; font-weight: 500; }
+  .card.user-added::after { content: '새로 추가'; position: absolute; top: 10px; right: 10px; font-size: 9px; padding: 2px 6px; border-radius: 100px; background: var(--coffee-cream); color: var(--coffee-medium); border: 1px solid var(--coffee-warm); pointer-events: none; }
+
+  /* Region two-step in modal */
+  .form-row-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  @media (max-width: 480px) {
+    .add-cafe-btn span { display: none; }
+    .add-cafe-btn { padding: 0.4rem 0.6rem; }
+    .modal { top: auto; bottom: 0; left: 0; right: 0; width: 100%; transform: translateY(20px) scale(0.99); border-radius: 20px 20px 0 0; }
+    .modal.open { transform: translateY(0) scale(1); }
+    .form-row-inline { grid-template-columns: 1fr; }
+  }
+
+  /* ── CAFE DETAIL PAGE ── */
+  .detail-page { display: none; position: fixed; inset: 0; background: var(--coffee-pale); z-index: 500; overflow-y: auto; animation: slideUp 0.28s cubic-bezier(0.4,0,0.2,1) both; }
+  .detail-page.open { display: block; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* FOOTER */
+  .site-footer { text-align: center; padding: 1.5rem; font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; border-top: 1px solid var(--border-light); margin-top: auto; }
+  .detail-header { background: var(--coffee-dark); color: var(--coffee-cream); padding: 0 1.5rem; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 20px rgba(44,24,16,0.3); }
+  .detail-header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; height: 60px; }
+  .back-btn { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 100px; border: 1px solid rgba(200,168,130,0.3); background: transparent; color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .back-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--coffee-light); }
+  .detail-header-name { font-family: 'Noto Serif KR', serif; font-size: 16px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .detail-body { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 700px) { .detail-body { grid-template-columns: 1fr; padding: 1rem; } }
+
+  .detail-section { background: var(--white); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; }
+  .detail-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); padding: 1rem 1.25rem 0.5rem; }
+  .detail-map-wrap { width: 100%; background: var(--coffee-pale); position: relative; overflow: hidden; }
+  .detail-map-wrap iframe { width: 100%; height: 280px; border: none; display: block; }
+  .detail-map-placeholder { width: 100%; padding: 2rem 1.25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; background: var(--coffee-pale); min-height: 180px; }
+  .detail-map-placeholder-icon { font-size: 2.5rem; opacity: 0.6; }
+  .detail-map-placeholder-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .detail-map-open-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.65rem 1.25rem; border-radius: 10px; background: #03C75A; color: #fff; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; text-decoration: none; border: none; cursor: pointer; transition: opacity 0.15s; }
+  .detail-map-open-btn:hover { opacity: 0.88; }
+  .detail-map-link { display: block; text-align: center; padding: 0.75rem; font-size: 12px; color: var(--coffee-medium); text-decoration: none; border-top: 1px solid var(--border-light); transition: background 0.15s; }
+  .detail-map-link:hover { background: var(--coffee-cream); }
+
+  .detail-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .detail-photo { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .detail-photo-placeholder { width: 100%; aspect-ratio: 1; background: var(--coffee-cream); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--coffee-light); }
+
+  .detail-info { grid-column: 1 / -1; background: var(--white); border: 1px solid var(--border-light); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  @media (max-width: 700px) { .detail-info { grid-column: 1; } }
+  .detail-cafe-name { font-family: 'Noto Serif KR', serif; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+  .detail-region { font-size: 12px; color: var(--text-muted); }
+  .detail-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; word-break: keep-all; }
+  .detail-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .detail-tag { font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--coffee-pale); color: var(--text-secondary); border: 1px solid var(--border-light); }
+  .detail-instagram { display: flex; align-items: center; gap: 0.5rem; font-size: 13px; color: var(--coffee-medium); text-decoration: none; padding: 0.5rem 0; border-top: 1px solid var(--border-light); margin-top: 0.25rem; transition: color 0.15s; }
+  .detail-instagram:hover { color: var(--coffee-dark); }
+  .detail-instagram svg { flex-shrink: 0; }
+
+  /* DELETE button in detail */
+  .detail-delete-btn { padding: 0.4rem 0.9rem; border-radius: 100px; border: 1px solid rgba(200,168,130,0.3); background: transparent; color: rgba(200,168,130,0.7); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .detail-delete-btn:hover { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,0.05); }
+
+  /* PASSWORD MODAL */
+  .pw-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); width: min(320px, calc(100vw - 2rem)); background: var(--white); border-radius: 16px; box-shadow: 0 20px 60px rgba(44,24,16,0.25); padding: 1.5rem; z-index: 600; opacity: 0; pointer-events: none; transition: all 0.18s; }
+  .pw-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .pw-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 599; backdrop-filter: blur(2px); }
+  .pw-overlay.open { display: block; }
+  .pw-title { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
+  .pw-input { width: 100%; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background: var(--coffee-pale); color: var(--text-primary); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; letter-spacing: 0.2em; }
+  .pw-input:focus { border-color: var(--coffee-medium); }
+  .pw-error { font-size: 12px; color: #c0392b; min-height: 16px; margin-top: 6px; }
+  .pw-btns { display: flex; gap: 8px; margin-top: 1rem; }
+  .pw-cancel { flex: 1; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; cursor: pointer; }
+  .pw-confirm { flex: 2; padding: 0.65rem; border-radius: 8px; border: none; background: var(--coffee-dark); color: var(--coffee-cream); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">☕</div>
+      <span class="logo-text">Cupick</span>
+    </div>
+    <div class="header-search">
+      <span class="header-search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="카페 이름 또는 지역 검색…" autocomplete="off">
+    </div>
+    <div class="header-right">
+      <span class="count-badge" id="countBadge"></span>
+      <button class="add-cafe-btn" id="addCafeBtn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a1 1 0 011 1v5h5a1 1 0 010 2H9v5a1 1 0 01-2 0V9H2a1 1 0 010-2h5V2a1 1 0 011-1z"/></svg>
+        <span>카페 추가</span>
+      </button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridViewBtn" title="그리드 보기">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        </button>
+        <button class="view-btn" id="listViewBtn" title="리스트 보기">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="12" width="14" height="2" rx="1"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-filter-bar" id="mobileFilterBar">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;">
+    <select class="region-select" id="mobileProvinceSel" style="flex:1;min-width:100px;font-size:12px;">
+      <option value="">전체 지역</option>
+    </select>
+    <select class="region-select" id="mobileDistrictSel" style="flex:1;min-width:100px;font-size:12px;" disabled>
+      <option value="">구/동 전체</option>
+    </select>
+  </div>
+  <button class="mobile-folder-chip" id="mobileFolderChip" onclick="toggleFolder('덕성여대')">
+    🎓 덕성여대
+  </button>
+  <button class="mobile-filter-toggle" id="mobileFilterToggle">
+    <span>🎛</span> 태그 필터
+  </button>
+  <div class="active-filters" id="mobileActiveChips"></div>
+</div>
+
+<div class="app-body">
+  <aside class="sidebar">
+    <div class="filter-section">
+      <span class="filter-label">📁 폴더</span>
+      <div class="tag-group" id="folderGroup">
+        <button class="folder-btn" id="folderBtn_duksung" onclick="toggleFolder('덕성여대')">
+          <span class="folder-icon">🎓</span>덕성여대
+          <span class="folder-count" id="folderCount_duksung">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="filter-section">
+      <span class="filter-label">지역</span>
+      <div class="region-step">
+        <select class="region-select" id="provinceSel">
+          <option value="">전체 지역</option>
+        </select>
+        <select class="region-select" id="districtSel" disabled>
+          <option value="">구/동 전체</option>
+        </select>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="filter-section">
+      <span class="filter-label">분위기</span>
+      <div class="tag-group" id="tagGroup_mood"></div>
+    </div>
+    <div class="filter-section">
+      <span class="filter-label">기능</span>
+      <div class="tag-group" id="tagGroup_func"></div>
+    </div>
+    <div class="filter-section">
+      <span class="filter-label">메뉴</span>
+      <div class="tag-group" id="tagGroup_menu"></div>
+    </div>
+    <button class="reset-btn" id="resetBtn">필터 초기화</button>
+  </aside>
+
+  <main class="content">
+    <div class="content-header">
+      <div class="active-filters" id="activeFiltersBar"></div>
+    </div>
+    <div class="cafe-grid" id="cafeGrid"></div>
+  </main>
+</div>
+</div>
+
+<!-- CAFE DETAIL PAGE -->
+<div class="detail-page" id="detailPage">
+  <div class="detail-header">
+    <div class="detail-header-inner">
+      <button class="back-btn" id="backBtn">← 목록으로</button>
+      <span class="detail-header-name" id="detailHeaderName"></span>
+      <button class="detail-delete-btn" id="detailDeleteBtn">삭제</button>
+    </div>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<!-- ADD CAFE MODAL -->
+<div class="modal-overlay" id="modalOverlay"></div>
+<div class="modal" id="addCafeModal">
+  <div class="modal-header">
+    <h2 class="modal-title">카페 추가</h2>
+    <button class="modal-close" id="modalClose">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-row">
+      <label class="form-label">카페 이름 <span class="required">*</span></label>
+      <input class="form-input" id="inputName" type="text" placeholder="예: 블루보틀 삼청">
+    </div>
+    <div class="form-row">
+      <label class="form-label">지역 <span class="required">*</span></label>
+      <div class="form-row-inline">
+        <select class="form-input" id="inputProvince">
+          <option value="">시/도 선택</option>
+        </select>
+        <select class="form-input" id="inputDistrict" disabled>
+          <option value="">구/동 선택</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">한 줄 설명</label>
+      <textarea class="form-input form-textarea" id="inputDesc" placeholder="이 카페만의 매력을 적어보세요"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">인스타그램 계정 (선택)</label>
+      <input class="form-input" id="inputInstagram" type="text" placeholder="예: @cupick_cafe (없으면 비워두세요)">
+    </div>
+    <div class="form-row">
+      <label class="form-label">폴더</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="modalFolderGroup">
+        <button type="button" class="modal-tag-btn" id="modalFolderBtn_duksung" onclick="toggleModalFolder('덕성여대')">🎓 덕성여대</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">태그 선택</label>
+      <div class="modal-tag-groups">
+        <div class="modal-tag-group-label">분위기</div>
+        <div class="modal-tags" id="modalTags_mood"></div>
+        <div class="modal-tag-group-label">기능</div>
+        <div class="modal-tags" id="modalTags_func"></div>
+        <div class="modal-tag-group-label">메뉴</div>
+        <div class="modal-tags" id="modalTags_menu"></div>
+      </div>
+    </div>
+    <div class="form-error" id="formError"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="modal-cancel" id="modalCancel">취소</button>
+    <button class="modal-submit" id="modalSubmit">추가하기</button>
+  </div>
+</div>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-title">태그 필터</div>
+  <span class="drawer-section-label">분위기</span>
+  <div class="drawer-tags" id="drawerTags_mood"></div>
+  <span class="drawer-section-label">기능</span>
+  <div class="drawer-tags" id="drawerTags_func"></div>
+  <span class="drawer-section-label">메뉴</span>
+  <div class="drawer-tags" id="drawerTags_menu"></div>
+  <div class="drawer-footer">
+    <button class="drawer-reset" id="drawerResetBtn">초기화</button>
+    <button class="drawer-apply" id="drawerApplyBtn">적용하기</button>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pwOverlay"></div>
+<div class="pw-modal" id="pwModal">
+  <div class="pw-title">삭제 비밀번호 입력</div>
+  <input class="pw-input" id="pwInput" type="password" placeholder="비밀번호" maxlength="10">
+  <div class="pw-error" id="pwError"></div>
+  <div class="pw-btns">
+    <button class="pw-cancel" id="pwCancel">취소</button>
+    <button class="pw-confirm" id="pwConfirm">확인</button>
+  </div>
+</div>
+
+<script>
+// ── REGION DATA ──
+const PROVINCE_DISTRICTS = {
+  "서울": ["전체","강남","강동","강북","강서","관악","광진","구로","금천","노원","도봉","동대문","동작","마포","서대문","서초","성동","성북","송파","양천","영등포","용산","은평","종로","중구","중랑",
+    // 동 단위 (자주 쓰는 것)
+    "연남","연희동","홍대","합정","망원","상수","마포","성수","왕십리","을지로","광화문","여의도","잠실","이태원","한남","해방촌","창신동","익선동","안국","북촌","서촌","부암동","문래"],
+  "경기": ["전체","고양","광주","군포","남양주","부천","성남","수원","시흥","안산","안양","용인","의정부","파주","평택","포천","화성"],
+  "인천": ["전체","계양","남동","동구","미추홀","부평","서구","연수","중구"],
+  "강원": ["전체","강릉","삼척","속초","원주","춘천"],
+  "충북": ["전체","제천","청주","충주"],
+  "충남": ["전체","공주","서산","아산","천안"],
+  "대전": ["전체","대덕","동구","서구","유성","중구"],
+  "세종": ["전체"],
+  "경북": ["전체","경주","구미","안동","포항"],
+  "경남": ["전체","거제","김해","마산","진주","창원"],
+  "대구": ["전체","달서","달성","동구","북구","서구","수성","중구"],
+  "부산": ["전체","강서","기장","남구","동구","동래","부산진","북구","사상","사하","서구","수영","연제","영도","중구","해운대"],
+  "울산": ["전체","남구","동구","북구","울주","중구"],
+  "광주": ["전체","광산","남구","동구","북구","서구"],
+  "전북": ["전체","군산","남원","전주"],
+  "전남": ["전체","광양","목포","순천","여수"],
+  "제주": ["전체","제주시","서귀포","애월","한림","구좌","한경","성산"]
+};
+
+// 카페 데이터에서 광역시/도 추출 함수
+function getProvinceFromRegion(region) {
+  if (!region) return '';
+  const r = region.trim();
+  // 명시적 매핑
+  if (r.startsWith('서울') || ['연남','연희동','홍대','합정','망원','상수','성수','을지로','광화문','여의도','잠실','이태원','한남','해방촌','창신동','익선동','안국','북촌','서촌','부암동','문래','마포','노원'].includes(r)) return '서울';
+  if (r.startsWith('경기') || ['수원','고양','남양주','성남','부천','시흥','파주','남양주','포천'].some(v => r.includes(v))) return '경기';
+  if (r.startsWith('인천')) return '인천';
+  if (r.startsWith('강원')) return '강원';
+  if (r.startsWith('충북')) return '충북';
+  if (r.startsWith('충남')) return '충남';
+  if (r.startsWith('경북')) return '경북';
+  if (r.startsWith('경남')) return '경남';
+  if (r.startsWith('대전')) return '대전';
+  if (r.startsWith('대구') || r === '대구') return '대구';
+  if (r.startsWith('부산') || r === '부산') return '부산';
+  if (r.startsWith('울산') || r === '울산') return '울산';
+  if (r.startsWith('광주') || r === '광주') return '광주';
+  if (r.startsWith('전북') || r === '전북') return '전북';
+  if (r.startsWith('전남') || r === '전남') return '전남';
+  if (r.startsWith('제주')) return '제주';
+  return r;
+}
+
+function getDistrictFromRegion(region) {
+  if (!region) return '';
+  const r = region.trim();
+  // 서울 동 단위
+  const seoulDong = ['연남','연희동','홍대','합정','망원','상수','성수','을지로','광화문','여의도','잠실','이태원','한남','해방촌','창신동','익선동','안국','북촌','서촌','부암동','문래','마포','노원'];
+  if (seoulDong.includes(r)) return r;
+  const parts = r.split(/[\s　]/);
+  if (parts.length >= 2) return parts.slice(1).join(' ');
+  return '';
+}
+
+// ── TAG GROUPS ──
+const TAG_GROUPS = {
+  mood: ["조용함","분위기 좋음","음악 감상","인테리어","공간 넓음","웨이팅 있음"],
+  func: ["공부하기 좋음","테라스 있음","반려동물 가능"],
+  menu: ["음료 맛있음","스페셜티 커피","베이커리"]
+};
+
+// ── DUKSUNG CAFES ──
+const DUKSUNG_CAFES = [
+  {name:"커피문화사 수유",region:"서울 강북",province:"서울",district:"강북",desc:"고양이 있음. 앤틱한 인테리어. 공부하기는 어려움,",tags:["공부하기 좋음", "인테리어", "반려동물 가능"],folder:"덕성여대"},
+  {name:"썬스마일",region:"서울 도봉",province:"서울",district:"도봉",desc:"우이천에서 타코를 먹어보아요",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"세이지",region:"서울 도봉",province:"서울",district:"도봉",desc:"통창 有",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"하이그라운드제빵소",region:"서울 강북",province:"서울",district:"강북",desc:"테라스 有, 산속에 있는 대형카페",tags:["테라스 있음", "공간 넓음"],folder:"덕성여대"},
+  {name:"미즐카페엠",region:"서울 강북",province:"서울",district:"강북",desc:"419카페거리 위치, 테라스 有, 북한산뷰 브런치카페",tags:["테라스 있음", "브런치"],folder:"덕성여대"},
+  {name:"비르케 419수유",region:"서울 강북",province:"서울",district:"강북",desc:"22시까지 영업, 테라스 有, 대형카페",tags:["테라스 있음", "공간 넓음"],folder:"덕성여대"},
+  {name:"슬로핸드",region:"서울 강북",province:"서울",district:"강북",desc:"재즈 라이브 공연 관람 가능(일정 확인 必), 테라스 有, 책읽기 좋음",tags:["테라스 있음", "공부하기 좋음", "음악 감상"],folder:"덕성여대"},
+  {name:"카페멘디",region:"서울 강북",province:"서울",district:"강북",desc:"테라스 有, 브런치카페",tags:["테라스 있음", "브런치"],folder:"덕성여대"},
+  {name:"더블즈",region:"서울 도봉",province:"서울",district:"도봉",desc:"휘낭시에 테이크아웃 전문",tags:["베이커리"],folder:"덕성여대"},
+  {name:"그때거기",region:"서울 도봉",province:"서울",district:"도봉",desc:"샌드위치",tags:["베이커리"],folder:"덕성여대"},
+  {name:"마이림",region:"서울 도봉",province:"서울",district:"도봉",desc:"기숙사살때 많이 먹었던 추억의 디저트 테이크아웃 전문 카페",tags:["베이커리"],folder:"덕성여대"},
+  {name:"티틸 CAFE",region:"서울 강북",province:"서울",district:"강북",desc:"공부하기 좋은 공간감 좋은 카페",tags:["공부하기 좋음"],folder:"덕성여대"},
+  {name:"숲오",region:"서울 도봉",province:"서울",district:"도봉",desc:"반땡이가 있는 공부하기도 수다떨기도 좋은 카페",tags:["공부하기 좋음", "반려동물 가능"],folder:"덕성여대"},
+  {name:"도본",region:"서울 도봉",province:"서울",district:"도봉",desc:"케이크 맛집",tags:["베이커리"],folder:"덕성여대"},
+  {name:"히피스베이글 수유점",region:"서울 강북",province:"서울",district:"강북",desc:"베이글",tags:["베이커리"],folder:"덕성여대"},
+  {name:"조이키친",region:"서울 도봉",province:"서울",district:"도봉",desc:"샌드위치",tags:["베이커리"],folder:"덕성여대"},
+  {name:"몽브루",region:"서울 강북",province:"서울",district:"강북",desc:"통창 有, 단풍이 만개할때 가보세요",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"블랙다운커피",region:"서울 강북",province:"서울",district:"강북",desc:"블다라떼 먹기",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"eeeyo",region:"서울 도봉",province:"서울",district:"도봉",desc:"그릭요거트",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"오이오 oio",region:"서울 도봉",province:"서울",district:"도봉",desc:"공부하기 좋은 분위기 좋은 카페",tags:["공부하기 좋음", "분위기 좋음"],folder:"덕성여대"},
+  {name:"반숙상회",region:"서울 도봉",province:"서울",district:"도봉",desc:"샌드위치 , 에그타르트",tags:["베이커리"],folder:"덕성여대"},
+  {name:"믓",region:"서울 강북",province:"서울",district:"강북",desc:"디저트 맛집",tags:["베이커리"],folder:"덕성여대"},
+  {name:"CBC 로스터스",region:"서울 강북",province:"서울",district:"강북",desc:"분위기 좋음. 카공하기 좋음.",tags:["공부하기 좋음", "분위기 좋음"],folder:"덕성여대"},
+  {name:"칩멍크",region:"서울 강북",province:"서울",district:"강북",desc:"브런치카페",tags:["브런치"],folder:"덕성여대"},
+  {name:"재간정",region:"서울 강북",province:"서울",district:"강북",desc:"그 유명한 우이천 복합문화공간",tags:["분위기 좋음"],folder:"덕성여대"},
+  {name:"컬딥",region:"서울 도봉",province:"서울",district:"도봉",desc:"조용하고 아늑한 분위기의 카페.",tags:["조용함", "분위기 좋음"],folder:"덕성여대"},
+  {name:"마메 수유",region:"서울 강북",province:"서울",district:"강북",desc:"커피와 디저트가 맛있는 분위기 좋은 카페.",tags:["분위기 좋음", "베이커리"],folder:"덕성여대"},
+  {name:"노르웨이안우드",region:"서울 강북",province:"서울",district:"강북",desc:"책 읽기 좋은 조용하고 분위기 있는 카페.",tags:["분위기 좋음", "공부하기 좋음"],folder:"덕성여대"},
+  {name:"에포케책방",region:"서울 강북",province:"서울",district:"강북",desc:"책방과 카페가 함께 있는 복합 공간. 조용히 책 읽기 좋음.",tags:["조용함", "공부하기 좋음", "분위기 좋음"],folder:"덕성여대"},
+  {name:"프로무케이크",region:"서울 도봉",province:"서울",district:"도봉",desc:"주문제작 케이크는 여기서",tags:["베이커리"],folder:"덕성여대"},
+  {name:"몬도커피츄러스",region:"서울 강북",province:"서울",district:"강북",desc:"수제 츄러스",tags:["베이커리"],folder:"덕성여대"},
+  {name:"카페크레프리",region:"서울 도봉",province:"서울",district:"도봉",desc:"크레페 존맛",tags:["베이커리"],folder:"덕성여대"},
+  {name:"VOL",region:"서울 도봉",province:"서울",district:"도봉",desc:"감각적인 인테리어의 조용한 카페.",tags:["조용함", "분위기 좋음", "인테리어"],folder:"덕성여대"},
+  {name:"우이사계",region:"서울 도봉",province:"서울",district:"도봉",desc:"산책 후 들르기 좋은 분위기 있는 카페.",tags:["공부하기 좋음"],folder:"덕성여대"},
+  {name:"디에그 본점",region:"서울 도봉",province:"서울",district:"도봉",desc:"에그 메뉴 전문. 든든한 브런치 즐길 수 있는 카페.",tags:["브런치"],folder:"덕성여대"},
+  {name:"무너미",region:"서울 강북",province:"서울",district:"강북",desc:"편안하고 아늑한 분위기의 카페.",tags:["분위기 좋음"],folder:"덕성여대"},
+];
+
+// ── CAFE DATA ──
+const cafes = [
+  {name:"잔결",region:"수원",province:"경기",district:"수원",desc:"감성 카페. 아늑한 공간에서 차분하게 즐길 수 있음. 혼자 방문하기 좋음.",tags:["조용함","분위기 좋음"]},
+  {name:"매치",region:"노원",province:"서울",district:"노원",desc:"감각적인 인테리어 카페. 사진 찍기 좋은 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"위플랜트위커피",region:"노원",province:"서울",district:"노원",desc:"스페셜티 카페. 원두 선택이 다양하고 커피 퀄리티 좋음.",tags:["스페셜티 커피"]},
+  {name:"비밀베이커리 구월점",region:"인천 남동",province:"인천",district:"남동",desc:"베이커리 카페. 빵 종류가 다양하고 퀄리티 높음.",tags:["베이커리","분위기 좋음"]},
+  {name:"펄시커피",region:"서울 중구",province:"서울",district:"중구",desc:"스페셜티 커피 전문 카페. 커피 본연의 맛에 집중한 공간.",tags:["스페셜티 커피"]},
+  {name:"이코복스커피 스튜디오 이태원점",region:"이태원",province:"서울",district:"이태원",desc:"스튜디오 감성 스페셜티 카페. 이태원 골목 안에 위치해 찾는 재미 있음.",tags:["스페셜티 커피","분위기 좋음"]},
+  {name:"괄호",region:"마포",province:"서울",district:"마포",desc:"마포구 주택가 감성 카페. 조용하고 아늑한 분위기.",tags:["조용함","분위기 좋음"]},
+  {name:"바나나하루키 상수점",region:"상수",province:"서울",district:"상수",desc:"음악 감성 카페. 바이닐 인테리어 인상적이고 음악 감상하기 좋음.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"비발라",region:"서울 종로",province:"서울",district:"종로",desc:"서촌 감성 카페. 조용하고 아늑해서 혼자 방문하기 좋음.",tags:["조용함","분위기 좋음"]},
+  {name:"마더스오피스",region:"서울 성북",province:"서울",district:"성북",desc:"카공 카페. 넓은 공간과 쾌적한 환경으로 공부하기 좋음.",tags:["공부하기 좋음","공간 넓음"]},
+  {name:"모안",region:"서울 성북",province:"서울",district:"성북",desc:"감성 인테리어 카페. 작지만 정성스러운 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"로스토",region:"서울 종로",province:"서울",district:"종로",desc:"종로 골목 안 빈티지 감성 카페. 인테리어 감각적.",tags:["분위기 좋음","인테리어"]},
+  {name:"비캔드",region:"망원",province:"서울",district:"망원",desc:"망원동 분위기 좋은 카페. 1·2층 구성으로 공간 여유로움.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"필리커피",region:"망원",province:"서울",district:"망원",desc:"스페셜티 커피 전문점. 다양한 원두 경험 가능.",tags:["스페셜티 커피"]},
+  {name:"파자마델리",region:"이태원",province:"서울",district:"이태원",desc:"이태원 청파동 감성 카페. 편안하고 아늑한 분위기.",tags:["분위기 좋음","조용함"]},
+  {name:"에이라운드",region:"서울 종로",province:"서울",district:"종로",desc:"명륜동 1·2층 구조 카페. 공간 여유롭고 감성적.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"크림슨파더 혜화",region:"서울 종로",province:"서울",district:"종로",desc:"혜화동 감성 카페. 독특한 분위기와 인테리어 돋보임.",tags:["분위기 좋음","인테리어"]},
+  {name:"카페 르상스",region:"한남",province:"서울",district:"한남",desc:"사운즈 한남 내 세련된 카페. 고급스러운 인테리어 매력적.",tags:["분위기 좋음","인테리어"]},
+  {name:"해브 방배",region:"서울 서초",province:"서울",district:"서초",desc:"방배동 조용하고 분위기 좋은 카페. 동네 주민들이 즐겨 찾는 곳.",tags:["조용함","분위기 좋음"]},
+  {name:"피그먼츠 을지로입구점",region:"을지로",province:"서울",district:"을지로",desc:"을지로 감각적 인테리어 카페. 독특한 공간 구성 인상적.",tags:["인테리어","분위기 좋음"]},
+  {name:"음악감상실 온",region:"경기 시흥",province:"경기",district:"시흥",desc:"음악 감상 카페. 바이닐과 음악에 집중한 특별한 공간.",tags:["음악 감상","조용함"]},
+  {name:"장마가 시작될 때",region:"이태원",province:"서울",district:"이태원",desc:"이태원 지하 독특한 분위기 카페. 이름처럼 감성적인 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"멜티도나",region:"잠실",province:"서울",district:"잠실",desc:"도넛 카페. 다양한 도넛 메뉴와 분위기 있는 공간 매력적.",tags:["베이커리","분위기 좋음"]},
+  {name:"팀리커피로스터스",region:"마포",province:"서울",district:"마포",desc:"스페셜티 커피 로스터리. 직접 로스팅한 원두 커피 특별함.",tags:["스페셜티 커피"]},
+  {name:"마주이",region:"잠실",province:"서울",district:"잠실",desc:"잠실 분위기 좋은 카페. 아늑한 공간에서 여유로운 시간 보낼 수 있음.",tags:["분위기 좋음","조용함"]},
+  {name:"늘",region:"서울 성북",province:"서울",district:"성북",desc:"성북동 한적하고 조용한 카페. 오래 머물기 좋음.",tags:["조용함","분위기 좋음"]},
+  {name:"어센딩 커피 웨이브",region:"서울 동대문",province:"서울",district:"동대문",desc:"제기동 스페셜티 커피 전문점. 커피 추출에 진심인 카페.",tags:["스페셜티 커피"]},
+  {name:"아트포라이프",region:"부암동",province:"서울",district:"부암동",desc:"부암동 예술 감성 카페. 전시와 커피를 함께 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"루브레드",region:"서울 강서",province:"서울",district:"강서",desc:"강서구 베이커리 카페. 빵 퀄리티 높고 종류 다양함.",tags:["베이커리","분위기 좋음"]},
+  {name:"굴림 서촌점",region:"서촌",province:"서울",district:"서촌",desc:"서촌 골목 감성 카페. 독특한 인테리어와 아늑한 분위기 매력.",tags:["분위기 좋음","인테리어"]},
+  {name:"굴림 북촌점",region:"북촌",province:"서울",district:"북촌",desc:"북촌 한옥 거리 감성 카페. 한옥과 어우러진 독특한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"townpond",region:"을지로",province:"서울",district:"을지로",desc:"을지로 분위기 카페. 감각적인 인테리어 돋보임.",tags:["분위기 좋음","인테리어"]},
+  {name:"이스트만",region:"서울 종로",province:"서울",district:"종로",desc:"창신동 2층 구조 카페. 전망 좋고 분위기 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"반숙상회",region:"서울 도봉",province:"서울",district:"도봉",desc:"도봉구 아늑한 동네 카페. 소박하지만 따뜻한 분위기 매력.",tags:["조용함","분위기 좋음"]},
+  {name:"유목커피바",region:"서울 성북",province:"서울",district:"성북",desc:"스페셜티 커피와 음악 감성 동시에 즐길 수 있는 카페. 바이닐 감성 가득.",tags:["스페셜티 커피","음악 감상","분위기 좋음"]},
+  {name:"푸어링아웃 메라키",region:"연희동",province:"서울",district:"연희동",desc:"연희동 지하 아늑한 카페. 숨겨진 공간 같은 느낌 매력.",tags:["조용함","분위기 좋음"]},
+  {name:"베이비펌킨",region:"이태원",province:"서울",district:"이태원",desc:"한강로 분위기 카페. 3층 구조로 조망 좋음.",tags:["분위기 좋음","인테리어"]},
+  {name:"카키바움",region:"이태원",province:"서울",district:"이태원",desc:"독일 감성 음악 카페. 바이닐과 음악 즐기기 좋음.",tags:["음악 감상","분위기 좋음"]},
+  {name:"크레미엘",region:"서울 서초",province:"서울",district:"서초",desc:"양재동 분위기 카페. 세련된 인테리어 돋보임.",tags:["분위기 좋음","인테리어"]},
+  {name:"소울브레드",region:"서울 서초",province:"서울",district:"서초",desc:"우면동 베이커리 카페. 정성스럽게 구운 빵 매력.",tags:["베이커리","분위기 좋음"]},
+  {name:"빌라커피바",region:"이태원",province:"서울",district:"이태원",desc:"스페셜티 커피와 음악 감성 모두 잡은 카페. 바이닐 분위기 살려줌.",tags:["스페셜티 커피","음악 감상"]},
+  {name:"쉘터 해방촌",region:"해방촌",province:"서울",district:"해방촌",desc:"해방촌 3층 감각적 인테리어 카페. 독특한 공간 구성 인상적.",tags:["분위기 좋음","인테리어"]},
+  {name:"킵댓 여의도점",region:"여의도",province:"서울",district:"여의도",desc:"여의도 분위기 좋은 카페. 직장인들이 즐겨 찾는 여유로운 공간.",tags:["분위기 좋음","공부하기 좋음"]},
+  {name:"바이러닉 에스프레소바 동여의도점",region:"여의도",province:"서울",district:"여의도",desc:"여의도 스페셜티 에스프레소 바. 음료 맛있음.",tags:["스페셜티 커피","음악 감상","음료 맛있음"]},
+  {name:"대한목장",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"서귀포 남원읍 뷰 카페. 목장 감성과 제주 자연 동시에 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"미르담",region:"제주",province:"제주",district:"제주시",desc:"용담동 뷰가 아름다운 카페. 제주 특유의 감성 느낄 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"버터투버터",region:"인천 남동",province:"인천",district:"남동",desc:"구월동 분위기 좋은 카페. 아늑하고 편안한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"바람",region:"제주",province:"제주",district:"제주시",desc:"월정리 음악과 바다 뷰 즐길 수 있는 카페. 제주 감성 가득.",tags:["음악 감상","분위기 좋음","테라스 있음"]},
+  {name:"사랑자유평화낭만",region:"제주",province:"제주",district:"제주시",desc:"이도동 낭만적인 감성 카페. 이름만큼 특별한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"푸아루",region:"제주",province:"제주",district:"제주시",desc:"삼도동 분위기 카페. 제주의 여유로운 감성 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"포뮬라 아뜰리에",region:"서촌",province:"서울",district:"서촌",desc:"서촌 아뜰리에 감성 카페. 예술적인 공간에서 커피 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"로우더 문래",region:"문래",province:"서울",district:"문래",desc:"문래동 분위기 카페. 문래 예술촌 감성 느껴짐.",tags:["분위기 좋음","인테리어"]},
+  {name:"티하우스일지",region:"안국",province:"서울",district:"안국",desc:"안국동 티 하우스 카페. 조용한 전통 분위기에서 차와 커피 즐길 수 있음. 음료 맛있음.",tags:["조용함","분위기 좋음","음료 맛있음"]},
+  {name:"그로니",region:"합정",province:"서울",district:"합정",desc:"합정동 분위기 카페. 아늑한 공간에서 여유로운 시간 보낼 수 있음.",tags:["분위기 좋음","조용함"]},
+  {name:"도덕과 규범",region:"상수",province:"서울",district:"상수",desc:"상수동 개성 있는 감성 카페. 독특한 이름만큼 유니크한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"무심",region:"이태원",province:"서울",district:"이태원",desc:"후암동 조용한 지하 카페. 이름처럼 여유롭고 차분한 분위기.",tags:["조용함","분위기 좋음"]},
+  {name:"콘크리트월",region:"충북 제천",province:"충북",district:"제천",desc:"제천 개성 있는 분위기 카페. 콘크리트 감성의 독특한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"기호",region:"충북 제천",province:"충북",district:"제천",desc:"제천 교동 분위기 카페. 지역 감성이 느껴지는 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"에피네 수유",region:"서울 강북",province:"서울",district:"강북",desc:"수유동 루프탑 카페. 탁 트인 전망과 함께 커피 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"오롬마르",region:"제주 애월",province:"제주",district:"애월",desc:"제주 애월읍 뷰가 아름다운 카페. 제주 오름 감성 느낄 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"보보정",region:"강원 삼척",province:"강원",district:"삼척",desc:"삼척 분위기 카페. 지역 여행 중 들르기 좋은 감성 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"푸노야 안국점",region:"안국",province:"서울",district:"안국",desc:"안국동 분위기 카페. 북촌 주변을 산책하다 들르기 좋음.",tags:["분위기 좋음","인테리어"]},
+  {name:"연플레이스",region:"연남",province:"서울",district:"연남",desc:"연남동 분위기 카페. 연트럴파크 인근 여유로운 공간.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"레망도레 광화문점",region:"광화문",province:"서울",district:"광화문",desc:"광화문 멀티플 카페. 1~3층 구성으로 공간 넓고 분위기 다양함.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"스윗차징",region:"여의도",province:"서울",district:"여의도",desc:"여의도 직장인들이 즐겨 찾는 카페. 달콤한 메뉴와 편안한 분위기.",tags:["분위기 좋음"]},
+  {name:"스쿱스젤라또 여의도점",region:"여의도",province:"서울",district:"여의도",desc:"여의도 젤라또 카페. 시원하고 다양한 맛의 젤라또 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"아라리 북촌",region:"북촌",province:"서울",district:"북촌",desc:"북촌 가회동 감성 카페. 한옥 마을과 어우러지는 아늑한 공간.",tags:["분위기 좋음","조용함","인테리어"]},
+  {name:"리스카페 여의도",region:"여의도",province:"서울",district:"여의도",desc:"여의도 IFC몰 인근 카페. 넓고 쾌적한 공간 강점.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"하츠하우스",region:"서울 성동",province:"서울",district:"성동",desc:"성동구 송정동 감성 2층 카페. 분위기 좋음.",tags:["분위기 좋음","인테리어"]},
+  {name:"하우스서울",region:"잠실",province:"서울",district:"잠실",desc:"잠실 분위기 카페. 넓고 여유로운 공간 매력.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"리틈",region:"연남",province:"서울",district:"연남",desc:"연남동 감각적 인테리어 카페. 독특한 공간 구성 돋보임.",tags:["분위기 좋음","인테리어"]},
+  {name:"하우스오브바이닐 연남점",region:"연남",province:"서울",district:"연남",desc:"연남동 바이닐 감성 카페. 음악과 인테리어 어우러진 특별한 공간.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"오아시스80",region:"제주 애월",province:"제주",district:"애월",desc:"제주 애월 뷰 카페. 탁 트인 제주 바다 뷰가 일품.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"헤비사이드",region:"이태원",province:"서울",district:"이태원",desc:"이태원 한강로 분위기 카페. 세련된 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"블루메베이글 노형점",region:"제주",province:"제주",district:"제주시",desc:"제주 노형동 베이글 카페. 다양한 베이글과 제주 감성 즐길 수 있음.",tags:["베이커리","분위기 좋음","인테리어"]},
+  {name:"씨커seeker",region:"제주",province:"제주",district:"제주시",desc:"제주 노형동 뷰 카페. 감각적인 공간과 제주 전망 매력.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"카페04293",region:"북촌",province:"서울",district:"북촌",desc:"북촌 계동 조용한 카페. 소박하고 진정성 있는 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"분카샤 을지로점",region:"을지로",province:"서울",district:"을지로",desc:"을지로 감각적 인테리어 카페. 일본 감성의 독특한 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"필요의 방",region:"을지로",province:"서울",district:"을지로",desc:"을지로 4가 3층 감성 카페. 조용하고 분위기 있음.",tags:["조용함","인테리어","분위기 좋음"]},
+  {name:"더커피 성수",region:"성수",province:"서울",district:"성수",desc:"성수동 스페셜티 카페. 감각적인 인테리어와 높은 커피 퀄리티 강점.",tags:["스페셜티 커피","인테리어"]},
+  {name:"파일드",region:"서울 동대문",province:"서울",district:"동대문",desc:"신설동 분위기 카페. 조용하고 편안한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"이오이",region:"서울 종로",province:"서울",district:"종로",desc:"재동 감성 카페. 아늑하고 조용한 분위기 매력.",tags:["조용함","분위기 좋음"]},
+  {name:"티피",region:"을지로",province:"서울",district:"을지로",desc:"충무로 분위기 카페. 독특한 인테리어 돋보임.",tags:["인테리어","분위기 좋음"]},
+  {name:"애락",region:"을지로",province:"서울",district:"을지로",desc:"신당동 을지로 감성 카페. 분위기 있는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"허스밴즈",region:"서울 종로",province:"서울",district:"종로",desc:"팔판동 감성 카페. 아늑하고 분위기 있는 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"폴드커피",region:"서울 성북",province:"서울",district:"성북",desc:"월곡동 스페셜티 카페. 커피에 집중한 진지한 공간.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"침니펍",region:"서울 종로",province:"서울",district:"종로",desc:"통의동 펍 카페. 1~3층 구성으로 다양한 분위기 즐길 수 있음.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"커피스트",region:"서울 종로",province:"서울",district:"종로",desc:"신문로 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"S.caf",region:"이태원",province:"서울",district:"이태원",desc:"이태원 아르테소월 3층 분위기 카페. 조망 좋은 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"더 토트",region:"부암동",province:"서울",district:"부암동",desc:"부암동 감성 공간. 자연 속에 위치한 여유로운 카페.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"미은당",region:"부암동",province:"서울",district:"부암동",desc:"부암동 한옥 감성 카페. 전통과 현대가 어우러지는 독특한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"3025 coffee",region:"서울 종로",province:"서울",district:"종로",desc:"신영동 분위기 카페. 조용하고 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"주한독일문화원",region:"이태원",province:"서울",district:"이태원",desc:"후암동 독일문화원 내 카페. 독특한 장소에서 커피 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"테라로사 청계광장점",region:"광화문",province:"서울",district:"광화문",desc:"광화문 청계광장 테라로사. 넓은 공간과 좋은 커피 퀄리티 강점.",tags:["스페셜티 커피","공간 넓음"]},
+  {name:"써라운드",region:"경기 남양주",province:"경기",district:"남양주",desc:"남양주 분위기 카페. 자연 속에 위치해 여유로운 시간 보낼 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"앤트러사이트 서교점",region:"마포",province:"서울",district:"마포",desc:"홍대 서교동 앤트러사이트. 공장 감성의 넓은 공간 매력.",tags:["공간 넓음","분위기 좋음","스페셜티 커피"]},
+  {name:"CBC 로스터스",region:"서울 강북",province:"서울",district:"강북",desc:"수유동 스페셜티 로스터리. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"칩멍크",region:"서울 강북",province:"서울",district:"강북",desc:"수유동 분위기 카페. 동네 분위기와 어우러지는 아늑한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"카페 시소",region:"서울 성북",province:"서울",district:"성북",desc:"안암동 분위기 카페. 대학가 주변 감성 공간.",tags:["분위기 좋음","공부하기 좋음"]},
+  {name:"터방내",region:"서울 동작",province:"서울",district:"동작",desc:"흑석동 분위기 카페. 한강 인근 여유로운 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"샤뽀블랑",region:"서울 성북",province:"서울",district:"성북",desc:"성북동 분위기 카페. 조용하고 아늑한 성북동 감성.",tags:["조용함","분위기 좋음"]},
+  {name:"파브스커피",region:"서울 은평",province:"서울",district:"은평",desc:"은평구 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"로프트하우스",region:"문래",province:"서울",district:"문래",desc:"문래동 2층 분위기 카페. 문래 예술촌 감성 느껴짐.",tags:["분위기 좋음","인테리어"]},
+  {name:"솔트앤페퍼",region:"문래",province:"서울",district:"문래",desc:"문래동 분위기 카페. 감성적인 공간에서 커피 즐길 수 있음.",tags:["분위기 좋음","조용함"]},
+  {name:"연흔 로스터스",region:"서촌",province:"서울",district:"서촌",desc:"서촌 체부동 스페셜티 로스터리. 진지하게 커피를 즐기는 공간.",tags:["스페셜티 커피","조용함"]},
+  {name:"키하라",region:"이태원",province:"서울",district:"이태원",desc:"효창동 분위기 카페. 조용한 주택가의 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"컴피",region:"합정",province:"서울",district:"합정",desc:"합정동 2층 분위기 카페. 아늑하고 편안하며 공부하기도 좋음.",tags:["분위기 좋음","조용함","공부하기 좋음"]},
+  {name:"부쉬",region:"경북 경주",province:"경북",district:"경주",desc:"경주 노동동 분위기 카페. 경주 여행 중 들르기 좋은 감성 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"실락원",region:"홍대",province:"서울",district:"홍대",desc:"동교동 지하 분위기 카페. 숨겨진 낙원 같은 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"마이페이보릿",region:"홍대",province:"서울",district:"홍대",desc:"서교동 지하 분위기 카페. 아기자기하고 개성 있는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"운카페에주께로",region:"마포",province:"서울",district:"마포",desc:"성산동 이국적인 감성 카페. 뷰가 있는 분위기 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"센토브",region:"망원",province:"서울",district:"망원",desc:"망원동 분위기 카페. 아늑하고 편안한 동네 카페.",tags:["분위기 좋음","조용함"]},
+  {name:"루헤아지트",region:"서울 동대문",province:"서울",district:"동대문",desc:"회기동 2층 분위기 카페. 대학가 주변 감성 공간.",tags:["분위기 좋음","공부하기 좋음"]},
+  {name:"브레드앤워크",region:"서울 강남",province:"서울",district:"강남",desc:"도곡동 베이커리 카페. 다양한 빵과 넓은 공간 강점.",tags:["베이커리","공간 넓음","분위기 좋음"]},
+  {name:"어글리소사이어티",region:"이태원",province:"서울",district:"이태원",desc:"이태원 6층 루프탑 카페. 탁 트인 이태원 뷰가 일품.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"필담",region:"망원",province:"서울",district:"망원",desc:"망원동 2층 분위기 카페. 아늑하고 조용한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"리셉션",region:"서촌",province:"서울",district:"서촌",desc:"효자동 분위기 카페. 서촌의 조용하고 감성적인 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"마이시크릿덴",region:"광화문",province:"서울",district:"광화문",desc:"광화문 빌딩 4층 분위기 카페. 숨겨진 공간 같은 느낌.",tags:["분위기 좋음","인테리어","조용함"]},
+  {name:"코트사이드",region:"성수",province:"서울",district:"성수",desc:"성수동 3층 감각적 인테리어 카페. 스포츠 감성이 더해진 독특한 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"케미커피",region:"경기 포천",province:"경기",district:"포천",desc:"포천 스페셜티 카페. 자연 속에서 높은 퀄리티의 커피 즐길 수 있음.",tags:["스페셜티 커피","테라스 있음"]},
+  {name:"나이스워크투데이",region:"마포",province:"서울",district:"마포",desc:"신수동 2층 분위기 카페. 감성적인 공간에서 여유 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"프리롤 카페",region:"서울 은평",province:"서울",district:"은평",desc:"불광동 분위기 카페. 1·2층 구성으로 공간 넓음.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"스코그",region:"경기 광주",province:"경기",district:"광주",desc:"남한산성 인근 숲 속 카페. 자연 감성과 북유럽 인테리어 어우러진 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"카페 대너리스",region:"경기 남양주",province:"경기",district:"남양주",desc:"남양주 조안면 뷰 카페. 한강 뷰와 자연 즐기기 좋은 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"1인1상",region:"서울 은평",province:"서울",district:"은평",desc:"진관동 4·5층 분위기 카페. 탁 트인 뷰와 함께 여유로운 시간 보낼 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"삼옥",region:"성수",province:"서울",district:"성수",desc:"성수동 3층 감각적 인테리어 카페. 성수 감성 가득한 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"클래식 해례커피 성수본점",region:"성수",province:"서울",district:"성수",desc:"성수동 스페셜티 카페. 감각적인 인테리어와 높은 커피 퀄리티 강점.",tags:["스페셜티 커피","인테리어"]},
+  {name:"밀스",region:"성수",province:"서울",district:"성수",desc:"성수동 감각적 인테리어 카페. 1·2층 구성으로 공간 넓음.",tags:["인테리어","공간 넓음"]},
+  {name:"부암동 제비꽃다방",region:"부암동",province:"서울",district:"부암동",desc:"부암동 레트로 테마 카페. 다방 분위기 매력.",tags:["분위기 좋음","인테리어"]},
+  {name:"포베러",region:"서울 서초",province:"서울",district:"서초",desc:"서초동 분위기 카페. 조용하고 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"동경책방",region:"연희동",province:"서울",district:"연희동",desc:"연희동 지하 북카페. 책과 커피를 함께 즐길 수 있음. 조용하고 아늑함.",tags:["조용함","분위기 좋음","공부하기 좋음"]},
+  {name:"후엘고",region:"마포",province:"서울",district:"마포",desc:"마포구 염리동 분위기 카페. 따뜻하고 아늑한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"티히 커피",region:"서울 성북",province:"서울",district:"성북",desc:"월곡동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"현대음률",region:"연남",province:"서울",district:"연남",desc:"연남동 2층 감각적 인테리어 카페. 음악과 인테리어 어우러진 공간.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"한남작업실",region:"한남",province:"서울",district:"한남",desc:"한남동 작업하기 좋은 카페. 감각적인 인테리어에서 공부하기도 좋음.",tags:["공부하기 좋음","인테리어"]},
+  {name:"여기인가",region:"서촌",province:"서울",district:"서촌",desc:"통인동 분위기 카페. 서촌의 아늑한 감성 느껴지는 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"베란다",region:"서촌",province:"서울",district:"서촌",desc:"내자동 분위기 카페. 베란다 감성의 여유로운 공간.",tags:["분위기 좋음","테라스 있음"]},
+  {name:"도트베이글팩토리",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"서귀포 베이글 카페. 다양한 베이글과 제주 감성 즐길 수 있음.",tags:["베이커리","인테리어"]},
+  {name:"메종메르미누",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"서귀포 대정읍 뷰 카페. 아름다운 자연과 함께 여유 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"브람스",region:"서울 종로",province:"서울",district:"종로",desc:"재동 클래식 감성 카페. 음악과 커피를 즐기는 조용한 공간.",tags:["음악 감상","조용함","분위기 좋음"]},
+  {name:"2층사무실",region:"서울 관악",province:"서울",district:"관악",desc:"봉천동 2층 분위기 카페. 이름처럼 작업하기 좋은 공간.",tags:["공부하기 좋음","분위기 좋음"]},
+  {name:"칼트칼터칼트",region:"이태원",province:"서울",district:"이태원",desc:"이태원 지하 독특한 분위기 카페. 개성 넘치는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"슬로우모션 커피바",region:"서울 관악",province:"서울",district:"관악",desc:"봉천동 스페셜티 카페. 커피 퀄리티 높고 음악 감성 더해짐.",tags:["스페셜티 커피","음악 감상"]},
+  {name:"힐즈앤유로파",region:"이태원",province:"서울",district:"이태원",desc:"용산 2층 분위기 카페. 이태원 감성 느껴지는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"정지영커피로스터즈 장안문점",region:"수원",province:"경기",district:"수원",desc:"수원 장안동 스페셜티 로스터리. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"나바호",region:"경기 파주",province:"경기",district:"파주",desc:"파주 음악 감성 카페. 바이닐과 음악이 어우러진 특별한 공간.",tags:["음악 감상","분위기 좋음"]},
+  {name:"카페 이즈바",region:"경기 파주",province:"경기",district:"파주",desc:"파주 광탄면 음악 감성 카페. 자연 속에서 음악과 커피 즐길 수 있음.",tags:["음악 감상","분위기 좋음","테라스 있음"]},
+  {name:"심기운",region:"서울 송파",province:"서울",district:"송파",desc:"가락동 헬리오시티 분위기 카페. 아파트 단지 안의 특별한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"홈앤브레드",region:"여의도",province:"서울",district:"여의도",desc:"영등포구 베이커리 카페. 다양한 빵과 가정적인 분위기 매력.",tags:["베이커리","분위기 좋음"]},
+  {name:"분더커피바 역곡본점",region:"경기 부천",province:"경기",district:"부천",desc:"부천 역곡 스페셜티 카페. 커피 퀄리티 높고 음악 감성 더해짐.",tags:["스페셜티 커피","음악 감상"]},
+  {name:"만수야커피먹자",region:"인천 남동",province:"인천",district:"남동",desc:"인천 만수동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피","공간 넓음"]},
+  {name:"힐먼트",region:"인천 연수",province:"인천",district:"연수",desc:"송도 분위기 카페. 넓고 쾌적한 공간 강점.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"끌림과자점",region:"인천 미추홀",province:"인천",district:"미추홀",desc:"인천 주안동 분위기 카페. 달콤한 과자와 음료 즐길 수 있음.",tags:["베이커리","분위기 좋음"]},
+  {name:"아이안",region:"성수",province:"서울",district:"성수",desc:"성수동 3층 감각적 인테리어 카페. 성수 감성 가득한 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"선잠",region:"서울 성북",province:"서울",district:"성북",desc:"성북동 분위기 카페. 조용하고 아늑한 성북동 감성.",tags:["조용함","분위기 좋음"]},
+  {name:"사만 커피 로스터스",region:"서울 성북",province:"서울",district:"성북",desc:"성북구 동소문동 스페셜티 로스터리. 커피에 진심인 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"더한강",region:"서울 동작",province:"서울",district:"동작",desc:"동작구 본동 분위기 카페. 한강 인근 여유로운 테라스 공간.",tags:["분위기 좋음","테라스 있음"]},
+  {name:"도프뮤지엄 구월",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 2층 분위기 카페. 뮤지엄 감성의 독특한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"로로커피",region:"여의도",province:"서울",district:"여의도",desc:"여의도 롯데캐슬 스페셜티 카페. 커피 퀄리티 높음.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"버터커피하우스",region:"여의도",province:"서울",district:"여의도",desc:"여의도 스페셜티 카페. 음료 맛있음. 편안한 분위기.",tags:["스페셜티 커피","분위기 좋음","음료 맛있음"]},
+  {name:"피피커피",region:"망원",province:"서울",district:"망원",desc:"망원동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"을지로 베로나",region:"을지로",province:"서울",district:"을지로",desc:"을지로 3층 감각적 인테리어 카페. 을지로 감성 물씬 풍기는 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"O'brett",region:"을지로",province:"서울",district:"을지로",desc:"을지로 4층 감각적 인테리어 카페. 독특한 공간 구성 인상적.",tags:["인테리어","분위기 좋음"]},
+  {name:"서서히",region:"제주",province:"제주",district:"제주시",desc:"이도동 조용한 카페. 제주의 여유로운 감성 느낄 수 있음.",tags:["조용함","분위기 좋음"]},
+  {name:"SOHAPPY",region:"제주",province:"제주",district:"제주시",desc:"삼도동 밝고 활기찬 카페. 기분 좋아지는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"그린루스카",region:"제주",province:"제주",district:"제주시",desc:"삼도동 분위기 카페. 제주 감성 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"고도.정",region:"제주",province:"제주",district:"제주시",desc:"용담동 분위기 카페. 제주의 고즈넉한 감성.",tags:["조용함","분위기 좋음","인테리어"]},
+  {name:"크랙커피",region:"서울 성북",province:"서울",district:"성북",desc:"보문동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"미묘",region:"연희동",province:"서울",district:"연희동",desc:"연희동 분위기 카페. 조용하고 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"혹스턴",region:"연희동",province:"서울",district:"연희동",desc:"연희동 2층 분위기 카페. 해외 감성의 세련된 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"오키드고멧 안국",region:"안국",province:"서울",district:"안국",desc:"원서동 2층 분위기 카페. 고메 감성의 특별한 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"아줄레주",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"제주 성산읍 포르투갈 감성 뷰 카페. 아름다운 자연 뷰 인상적.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"비주비주 한림점",region:"제주",province:"제주",district:"한림",desc:"제주 한림읍 뷰 카페. 바다가 보이는 아름다운 위치.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"환상",region:"수원",province:"경기",district:"수원",desc:"수원 남창동 3층 분위기 카페. 수원 감성 느껴지는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"위해브투데이",region:"수원",province:"경기",district:"수원",desc:"수원 신풍동 2층 분위기 카페. 행궁동 인근 감성 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"행궁동카페모종",region:"수원",province:"경기",district:"수원",desc:"수원 행궁동 분위기 카페. 수원화성 인근 감성 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"식물집카페",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"서귀포 서호동 식물 가득한 카페. 자연과 함께하는 제주 감성. 반려동물 가능.",tags:["분위기 좋음","인테리어","반려동물 가능"]},
+  {name:"비수기애호가",region:"제주",province:"제주",district:"구좌",desc:"제주 구좌읍 한동리 뷰 카페. 제주 비수기 감성 즐기기 좋음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"토오베",region:"서울 종로",province:"서울",district:"종로",desc:"인사동 3층 분위기 카페. 인사동 감성 느껴지는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"솔방울베이커리",region:"서울 종로",province:"서울",district:"종로",desc:"권농동 베이커리 카페. 솔방울 감성의 아늑한 공간.",tags:["베이커리","분위기 좋음"]},
+  {name:"식물",region:"익선동",province:"서울",district:"익선동",desc:"익선동 식물 가득한 감성 공간. 푸릇푸릇한 분위기 매력. 반려동물 가능.",tags:["분위기 좋음","인테리어","반려동물 가능"]},
+  {name:"커피 카프렛",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"프릳츠 원서점",region:"안국",province:"서울",district:"안국",desc:"원서동 아라리오뮤지엄 프릳츠 카페. 예술 공간과 커피가 만나는 특별한 곳.",tags:["스페셜티 커피","분위기 좋음","인테리어"]},
+  {name:"팔레센트",region:"수원",province:"경기",district:"수원",desc:"수원 북수동 2층 분위기 카페. 감성적인 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"포티드",region:"연남",province:"서울",district:"연남",desc:"창천동 분위기 카페. 연남동 감성 느껴지는 아늑한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"퍼먼트",region:"성수",province:"서울",district:"성수",desc:"성수동 감각적 인테리어 카페. 지하와 1층을 함께 사용하는 독특한 구조.",tags:["인테리어","분위기 좋음"]},
+  {name:"파롤앤랑그",region:"연남",province:"서울",district:"연남",desc:"연남동 감각적 인테리어 카페. 세련된 언어 감성의 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"어니언 미아",region:"서울 강북",province:"서울",district:"강북",desc:"미아동 어니언 카페. 공장 감성 인테리어 매력.",tags:["공간 넓음","인테리어","분위기 좋음"]},
+  {name:"무너미",region:"서울 강북",province:"서울",district:"강북",desc:"수유동 분위기 카페. 동네 특유의 아늑한 감성.",tags:["조용함","분위기 좋음"]},
+  {name:"모브",region:"서촌",province:"서울",district:"서촌",desc:"서촌 필운동 분위기 카페. 조용하고 감성적인 서촌 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"릴하우스",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 분위기 카페. 아늑하고 편안한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"코타티 해방촌",region:"해방촌",province:"서울",district:"해방촌",desc:"해방촌 감각적 인테리어 카페. 독특한 공간 구성 인상적.",tags:["인테리어","분위기 좋음"]},
+  {name:"오잇",region:"이태원",province:"서울",district:"이태원",desc:"용산동 분위기 카페. 아늑하고 편안한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"테르트르",region:"창신동",province:"서울",district:"창신동",desc:"창신동 분위기 카페. 조용한 골목 안 감성 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"낙원역",region:"익선동",province:"서울",district:"익선동",desc:"익선동 레트로 감성 카페. 음악과 함께하는 독특한 공간.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"헤이븐",region:"서촌",province:"서울",district:"서촌",desc:"창성동 조용한 카페. 서촌의 아늑한 감성 느낄 수 있음.",tags:["조용함","분위기 좋음"]},
+  {name:"독수리다방",region:"연남",province:"서울",district:"연남",desc:"연남동 8층 루프탑 카페. 연남동 뷰와 함께 커피 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"도넛정수 창신",region:"창신동",province:"서울",district:"창신동",desc:"창신동 도넛 전문 카페. 다양한 도넛과 개성 있는 공간 매력.",tags:["베이커리","분위기 좋음"]},
+  {name:"벙크오프",region:"경기 성남",province:"경기",district:"성남",desc:"성남 고등동 분위기 카페. 감성적인 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"베티버 성수",region:"성수",province:"서울",district:"성수",desc:"성수동 감각적 인테리어 카페. 성수 감성 가득한 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"묘사서울",region:"성수",province:"서울",district:"성수",desc:"성수동 2층 감각적 인테리어 카페. 독특한 공간 구성 인상적.",tags:["인테리어","분위기 좋음"]},
+  {name:"레이더 성수",region:"성수",province:"서울",district:"성수",desc:"성수동 감각적 인테리어 카페. 성수 특유의 세련된 감성.",tags:["인테리어","분위기 좋음"]},
+  {name:"피크니크 홍대경의선숲길점",region:"마포",province:"서울",district:"마포",desc:"홍대 경의선 숲길 분위기 카페. 산책 후 들르기 좋은 공간.",tags:["분위기 좋음","테라스 있음"]},
+  {name:"세컨드 도어",region:"연남",province:"서울",district:"연남",desc:"연남동 2층 감각적 인테리어 카페. 세련된 공간 구성 인상적.",tags:["인테리어","분위기 좋음"]},
+  {name:"오버스토리",region:"서울 성북",province:"서울",district:"성북",desc:"성북동 지하 분위기 카페. 숨겨진 공간 같은 느낌 매력.",tags:["조용함","분위기 좋음"]},
+  {name:"모시란",region:"제주",province:"제주",district:"제주시",desc:"일도동 분위기 카페. 제주 감성 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"레이오버",region:"제주",province:"제주",district:"구좌",desc:"제주 구좌읍 행원리 뷰 카페. 바다 뷰와 함께하는 감성 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"사직동 그 가게",region:"서촌",province:"서울",district:"서촌",desc:"서촌 사직동 분위기 카페. 조용하고 감성적인 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"스태픽스",region:"서촌",province:"서울",district:"서촌",desc:"서촌 필운동 분위기 카페. 아늑하고 조용한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"칠린",region:"서울 종로",province:"서울",district:"종로",desc:"명륜동 분위기 카페. 대학가 인근 공부하기도 좋은 공간.",tags:["분위기 좋음","공부하기 좋음"]},
+  {name:"보연희",region:"연희동",province:"서울",district:"연희동",desc:"연희동 2층 분위기 카페. 아늑하고 조용한 연희동 감성.",tags:["조용함","분위기 좋음"]},
+  {name:"책계일주",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"제주 표선면 북카페. 책과 함께 제주 감성 즐길 수 있음.",tags:["조용함","분위기 좋음","공부하기 좋음"]},
+  {name:"하우스오브바이닐 연희점",region:"연희동",province:"서울",district:"연희동",desc:"연희동 바이닐 감성 카페. 음악과 인테리어 어우러진 특별한 공간.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"드뷔시산장",region:"서울 성동",province:"서울",district:"성동",desc:"행당동 3층 분위기 카페. 클래식 음악 감성의 공간.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"산노루 제주",region:"제주",province:"제주",district:"한경",desc:"제주 한경면 자연 감성 뷰 카페. 제주 자연 속에서 여유 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"카페아오오",region:"제주 서귀포",province:"제주",district:"서귀포",desc:"제주 성산읍 뷰 카페. 성산일출봉 인근 아름다운 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"카페데스틸",region:"제주",province:"제주",district:"한경",desc:"제주 한경면 뷰 카페. 바다가 보이는 아름다운 위치.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"말로",region:"제주",province:"제주",district:"구좌",desc:"제주 교래리 자연 감성 카페. 넓은 자연 속에서 여유 즐길 수 있음.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"스테이위드커피",region:"제주",province:"제주",district:"제주시",desc:"제주 해안동 스페셜티 카페. 커피 퀄리티 높고 제주 감성도 느낄 수 있음.",tags:["스페셜티 커피","인테리어"]},
+  {name:"발루토 커피",region:"대구",province:"대구",district:"북구",desc:"대구 북구 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"뮤직컴플렉스서울 안녕인사동점",region:"서울 종로",province:"서울",district:"종로",desc:"인사동 5층 음악 감성 카페. 탁 트인 넓은 공간.",tags:["음악 감상","분위기 좋음","공간 넓음"]},
+  {name:"유원섬커피",region:"연남",province:"서울",district:"연남",desc:"창천동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피"]},
+  {name:"소하염전",region:"익선동",province:"서울",district:"익선동",desc:"익선동 레트로 감성 카페. 레트로 분위기 매력적.",tags:["분위기 좋음","인테리어"]},
+  {name:"키베이커리",region:"성수",province:"서울",district:"성수",desc:"성수동 베이커리 카페. 베이커리 퀄리티 높고 인테리어 감각적.",tags:["베이커리","인테리어"]},
+  {name:"커피앳웍스 이마빌딩광화문점",region:"광화문",province:"서울",district:"광화문",desc:"광화문 스페셜티 카페. 커피 퀄리티 높고 작업하기 좋음.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"평화",region:"문래",province:"서울",district:"문래",desc:"문래동 분위기 카페. 문래 감성 느껴지는 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"히히히 일산",region:"경기 고양",province:"경기",district:"고양",desc:"일산 정발산동 분위기 카페. 밝고 유쾌한 감성의 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"짐스하이드어웨이",region:"서울 광진",province:"서울",district:"광진",desc:"군자동 분위기 카페. 숨겨진 공간 같은 느낌 매력.",tags:["분위기 좋음","조용함"]},
+  {name:"식목일",region:"대구",province:"대구",district:"중구",desc:"대구 중구 식물 감성 카페. 아늑한 공간. 반려동물 가능.",tags:["분위기 좋음","인테리어","반려동물 가능"]},
+  {name:"평균이하",region:"제주 애월",province:"제주",district:"애월",desc:"제주 애월 뷰 카페. 평균 이상의 뷰를 즐길 수 있는 공간.",tags:["분위기 좋음","인테리어","테라스 있음"]},
+  {name:"카페 빅팬트리 행궁점",region:"수원",province:"경기",district:"수원",desc:"수원 행궁동 분위기 카페. 1·2층 구성으로 공간 넓음.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"원스타임오프 수원점",region:"수원",province:"경기",district:"수원",desc:"수원 신풍동 분위기 카페. 여유로운 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"원스타임오프 인천시청점",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 분위기 카페. 넓고 쾌적한 공간.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"시소 카이막 애월점",region:"제주 애월",province:"제주",district:"애월",desc:"제주 애월 카이막 카페. 독특한 메뉴와 제주 감성 즐길 수 있음.",tags:["분위기 좋음","인테리어"]},
+  {name:"너드앤드너",region:"수원",province:"경기",district:"수원",desc:"수원 북수동 분위기 카페. 개성 있는 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"2DO",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 분위기 카페. 아늑한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"로윅",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 지하 분위기 카페. 조용하고 편안한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"카페코사메",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 분위기 카페. 아늑하고 편안한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"마호가니 인천구월점",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 분위기 카페. 넓고 쾌적한 공간.",tags:["분위기 좋음","공간 넓음"]},
+  {name:"도쿄빙수 성신여대점",region:"서울 성북",province:"서울",district:"성북",desc:"성북구 빙수 카페. 다양한 빙수 메뉴와 감성적인 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"카페호미",region:"서울 종로",province:"서울",district:"종로",desc:"사간동 분위기 카페. 조용하고 아늑한 공간.",tags:["조용함","분위기 좋음"]},
+  {name:"클레멘타인플라워",region:"성수",province:"서울",district:"성수",desc:"성수동 꽃 감성 카페. 아름다운 플라워와 인테리어 어우러진 공간.",tags:["인테리어","분위기 좋음"]},
+  {name:"피오엘",region:"서울 은평",province:"서울",district:"은평",desc:"은평구 대조동 분위기 카페. 아늑하고 편안한 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"커피앤시가렛",region:"광화문",province:"서울",district:"광화문",desc:"광화문 빌딩 17층 스페셜티 카페. 탁 트인 뷰와 함께 높은 퀄리티의 커피 즐길 수 있음.",tags:["스페셜티 커피","인테리어","테라스 있음"]},
+  {name:"인크커피 가산점",region:"서울 금천",province:"서울",district:"금천",desc:"가산동 스페셜티 카페. 커피 퀄리티 높은 전문 카페.",tags:["스페셜티 커피","공부하기 좋음"]},
+  {name:"우드멜로우",region:"서울 강동",province:"서울",district:"강동",desc:"고덕동 분위기 카페. 따뜻한 우드 감성의 공간.",tags:["분위기 좋음","조용함"]},
+  {name:"silhouette coffee",region:"합정",province:"서울",district:"합정",desc:"합정동 분위기 카페. 실루엣 감성의 세련된 공간.",tags:["분위기 좋음","인테리어"]},
+  {name:"킷사텐",region:"경기 부천",province:"경기",district:"부천",desc:"부천 심곡동 일본 감성 카페. 킷사텐 특유의 레트로 분위기 매력.",tags:["음악 감상","인테리어","분위기 좋음"]},
+  {name:"테라로사 포스코센터점",region:"서울 강남",province:"서울",district:"강남",desc:"강남 포스코센터 테라로사. 넓고 쾌적한 공간.",tags:["스페셜티 커피","공간 넓음"]},
+  {name:"카페 파락호",region:"인천 남동",province:"인천",district:"남동",desc:"인천 구월동 2층 분위기 카페. 여유로운 공간.",tags:["분위기 좋음","조용함"]}
+];
+
+// ── INSTAGRAM MAP (실제 있는 곳 일부) ──
+const INSTAGRAM_MAP = {
+  "프릳츠 원서점": "https://www.instagram.com/fritz_coffee_company/",
+  "앤트러사이트 서교점": "https://www.instagram.com/anthracitecoffee/",
+  "어니언 미아": "https://www.instagram.com/onion.official_/",
+  "테라로사 청계광장점": "https://www.instagram.com/terarosa_coffee/",
+  "테라로사 포스코센터점": "https://www.instagram.com/terarosa_coffee/",
+  "하우스오브바이닐 연남점": "https://www.instagram.com/houseofvinyl_seoul/",
+  "하우스오브바이닐 연희점": "https://www.instagram.com/houseofvinyl_seoul/",
+};
+
+// ── STATE ──
+let activeTags = new Set();
+let activeProvince = '';
+let activeDistrict = '';
+let searchQuery = '';
+let isGridView = true;
+let currentCafeIdx = -1;
+let pendingDeleteIdx = -1;
+let activeFolder = '';
+
+// ── STORAGE (공유) via API backend fallback to localStorage ──
+const STORAGE_KEY = 'cupick-user-cafes-v2';
+
+function saveUserCafes() {
+  const userCafes = cafes.filter(c => c.userAdded);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userCafes)); } catch(e){}
+}
+function loadUserCafes() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { JSON.parse(saved).forEach(c => cafes.unshift(c)); }
+  } catch(e){}
+  // 덕성여대 카페는 별도 배열에서 관리 (중복 방지)
+  DUKSUNG_CAFES.forEach(c => {
+    if (!cafes.find(e => e.name === c.name && e.folder === '덕성여대')) cafes.unshift(c);
+  });
+}
+
+// ── REGION SELECTORS ──
+function buildProvinceSelectors() {
+  const provinces = Object.keys(PROVINCE_DISTRICTS);
+  ['provinceSel','mobileProvinceSel','inputProvince'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const isInput = id === 'inputProvince';
+    sel.innerHTML = isInput ? '<option value="">시/도 선택</option>' : '<option value="">전체 지역</option>';
+    provinces.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p; sel.appendChild(o);
+    });
+  });
+}
+
+function buildDistrictSelector(selId, province, isFilter) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  if (!province) {
+    sel.innerHTML = isFilter ? '<option value="">구/동 전체</option>' : '<option value="">구/동 선택</option>';
+    sel.disabled = true; return;
+  }
+  const districts = PROVINCE_DISTRICTS[province] || [];
+  sel.innerHTML = isFilter ? '<option value="">구/동 전체</option>' : '<option value="">구/동 선택</option>';
+  districts.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d === '전체' ? '' : d;
+    o.textContent = d === '전체' ? '전체' : d;
+    sel.appendChild(o);
+  });
+  sel.disabled = false;
+}
+
+// Province change -> district
+document.getElementById('provinceSel').addEventListener('change', e => {
+  activeProvince = e.target.value;
+  activeDistrict = '';
+  buildDistrictSelector('districtSel', activeProvince, true);
+  document.getElementById('districtSel').value = '';
+  render();
+});
+document.getElementById('districtSel').addEventListener('change', e => {
+  activeDistrict = e.target.value;
+  render();
+});
+document.getElementById('mobileProvinceSel').addEventListener('change', e => {
+  activeProvince = e.target.value;
+  activeDistrict = '';
+  buildDistrictSelector('mobileDistrictSel', activeProvince, true);
+  document.getElementById('mobileDistrictSel').value = '';
+  document.getElementById('provinceSel').value = e.target.value;
+  buildDistrictSelector('districtSel', activeProvince, true);
+  render();
+});
+document.getElementById('mobileDistrictSel').addEventListener('change', e => {
+  activeDistrict = e.target.value;
+  document.getElementById('districtSel').value = e.target.value;
+  render();
+});
+
+// Modal province/district
+document.getElementById('inputProvince').addEventListener('change', e => {
+  buildDistrictSelector('inputDistrict', e.target.value, false);
+});
+
+// ── TAG GROUPS ──
+function buildTagButtons(containerId, group) {
+  const container = document.getElementById(containerId);
+  TAG_GROUPS[group].forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-btn'; btn.dataset.tag = tag;
+    btn.innerHTML = `<span class="tag-dot"></span>${tag}`;
+    btn.onclick = () => toggleTag(tag);
+    container.appendChild(btn);
+  });
+}
+buildTagButtons('tagGroup_mood','mood');
+buildTagButtons('tagGroup_func','func');
+buildTagButtons('tagGroup_menu','menu');
+
+function buildDrawerTags(containerId, group) {
+  const container = document.getElementById(containerId);
+  TAG_GROUPS[group].forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'drawer-tag-btn'; btn.dataset.tag = tag; btn.textContent = tag;
+    btn.onclick = () => toggleTagDrawer(tag, btn);
+    container.appendChild(btn);
+  });
+}
+buildDrawerTags('drawerTags_mood','mood');
+buildDrawerTags('drawerTags_func','func');
+buildDrawerTags('drawerTags_menu','menu');
+
+function buildModalTags(containerId, group) {
+  const container = document.getElementById(containerId);
+  TAG_GROUPS[group].forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'modal-tag-btn'; btn.dataset.tag = tag; btn.textContent = tag;
+    btn.onclick = () => {
+      if (selectedModalTags.has(tag)) { selectedModalTags.delete(tag); btn.classList.remove('on'); }
+      else { selectedModalTags.add(tag); btn.classList.add('on'); }
+    };
+    container.appendChild(btn);
+  });
+}
+buildModalTags('modalTags_mood','mood');
+buildModalTags('modalTags_func','func');
+buildModalTags('modalTags_menu','menu');
+
+function toggleTag(tag) {
+  activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag);
+  updateTagUI(); render();
+}
+function toggleTagDrawer(tag, btn) {
+  activeTags.has(tag) ? (activeTags.delete(tag), btn.classList.remove('on')) : (activeTags.add(tag), btn.classList.add('on'));
+}
+function updateTagUI() {
+  document.querySelectorAll('.tag-btn').forEach(b => b.classList.toggle('on', activeTags.has(b.dataset.tag)));
+  document.querySelectorAll('.drawer-tag-btn').forEach(b => b.classList.toggle('on', activeTags.has(b.dataset.tag)));
+  document.getElementById('mobileFilterToggle').classList.toggle('has-filter', activeTags.size > 0);
+  updateActiveChips();
+}
+function updateActiveChips() {
+  ['activeFiltersBar','mobileActiveChips'].forEach(id => {
+    const bar = document.getElementById(id); if (!bar) return;
+    bar.innerHTML = '';
+    activeTags.forEach(tag => {
+      const chip = document.createElement('div');
+      chip.className = 'active-chip';
+      chip.innerHTML = `${tag} <span class="active-chip-remove" data-tag="${tag}">✕</span>`;
+      chip.querySelector('.active-chip-remove').onclick = () => { activeTags.delete(tag); updateTagUI(); render(); };
+      bar.appendChild(chip);
+    });
+  });
+}
+
+// ── RENDER ──
+function render() {
+  const q = searchQuery.toLowerCase();
+  const filtered = cafes.filter(c => {
+    const mq = !q || c.name.toLowerCase().includes(q) || (c.region||'').toLowerCase().includes(q) || (c.desc||'').toLowerCase().includes(q);
+    const mp = !activeProvince || c.province === activeProvince;
+    const md = !activeDistrict || c.district === activeDistrict;
+    const mt = activeTags.size === 0 || [...activeTags].every(t => c.tags.includes(t));
+    const mf = !activeFolder || c.folder === activeFolder;
+    return mq && mp && md && mt && mf;
+  });
+  document.getElementById('countBadge').textContent = filtered.length + '개';
+  const grid = document.getElementById('cafeGrid');
+  grid.className = 'cafe-grid' + (isGridView ? '' : ' list-view');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">☕</div><p>조건에 맞는 카페가 없어요</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map((c, i) => {
+    const globalIdx = cafes.indexOf(c);
+    return `<div class="card${c.userAdded?' user-added':''}${c.folder==='덕성여대'?' duksung':''}" style="animation-delay:${Math.min(i*20,200)}ms" data-idx="${globalIdx}" onclick="openDetail(${globalIdx})">
+      ${c.folder==='덕성여대'?'<span class="duksung-badge">🎓</span>':''}
+      <div class="card-top">
+        <span class="cafe-name">${c.name}</span>
+        <span class="region-chip">${c.district || c.region}</span>
+      </div>
+      <p class="cafe-desc">${c.desc}</p>
+      <div class="cafe-tags">${c.tags.map(t=>`<span class="tag ${activeTags.has(t)?'highlight':''}">${t}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── DETAIL PAGE ──
+function openDetail(idx) {
+  const c = cafes[idx];
+  if (!c) return;
+  currentCafeIdx = idx;
+  document.getElementById('detailHeaderName').textContent = c.name;
+
+  // Naver map search URL
+  const mapQuery = encodeURIComponent(c.name);
+  const naverMapUrl = `https://map.naver.com/v5/search/${mapQuery}`;
+  const naverPhotoUrl = `https://search.naver.com/search.naver?query=${mapQuery}+카페&where=image`;
+
+  // Instagram
+  const igUrl = c.instagram ? c.instagram : (INSTAGRAM_MAP[c.name] || null);
+
+  const instaHtml = igUrl ? `<a class="detail-instagram" href="${igUrl}" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    인스타그램 보기
+  </a>` : '';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-info" style="grid-column:1/-1">
+      <div>
+        <div class="detail-cafe-name">${c.name}</div>
+        <div class="detail-region">${c.province ? c.province + (c.district ? ' · ' + c.district : '') : c.region}</div>
+      </div>
+      <div class="detail-desc">${c.desc}</div>
+      <div class="detail-tags">${c.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div>
+      ${instaHtml}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">📍 지도</div>
+      <div class="detail-map-wrap">
+        <div class="detail-map-placeholder">
+          <div class="detail-map-placeholder-icon">🗺️</div>
+          <div class="detail-map-placeholder-text">${c.name}<br>위치를 네이버 지도에서 확인하세요</div>
+          <button class="detail-map-open-btn" onclick="openNaverMap('${mapQuery}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            네이버 지도에서 보기
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">📷 사진</div>
+      <div style="padding:0.75rem 1.25rem 1rem;">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:0.75rem">네이버 이미지 검색에서 카페 사진을 확인하세요.</p>
+        <a href="${naverPhotoUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;border-radius:8px;background:var(--coffee-cream);color:var(--coffee-medium);font-size:13px;text-decoration:none;border:1px solid var(--coffee-warm);transition:background 0.15s;" onmouseover="this.style.background='var(--coffee-warm)'" onmouseout="this.style.background='var(--coffee-cream)'">
+          📸 사진 검색하기
+        </a>
+      </div>
+    </div>`;
+
+  document.getElementById('detailPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('backBtn').onclick = closeDetail;
+
+// iOS swipe back gesture
+(function() {
+  const detailPage = document.getElementById('detailPage');
+  let touchStartX = 0, touchStartY = 0, isSwiping = false;
+
+  detailPage.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isSwiping = touchStartX < 40;
+  }, { passive: true });
+
+  detailPage.addEventListener('touchmove', e => {
+    if (!isSwiping) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+    if (dx > 0 && dy < 60) {
+      const progress = Math.min(dx / window.innerWidth, 1);
+      detailPage.style.transform = "translateX(" + (dx * 0.4) + "px)";
+      detailPage.style.opacity = String(1 - progress * 0.3);
+    }
+  }, { passive: true });
+
+  detailPage.addEventListener('touchend', e => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx > 90) {
+      detailPage.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+      detailPage.style.transform = "translateX(100%)";
+      detailPage.style.opacity = "0";
+      setTimeout(() => {
+        closeDetail();
+        detailPage.style.transform = "";
+        detailPage.style.opacity = "";
+        detailPage.style.transition = "";
+      }, 250);
+    } else {
+      detailPage.style.transition = "transform 0.2s ease, opacity 0.2s ease";
+      detailPage.style.transform = "";
+      detailPage.style.opacity = "";
+      setTimeout(() => { detailPage.style.transition = ""; }, 200);
+    }
+  }, { passive: true });
+})();
+
+// ── DELETE ──
+document.getElementById('detailDeleteBtn').onclick = () => {
+  document.getElementById('pwOverlay').classList.add('open');
+  document.getElementById('pwModal').classList.add('open');
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  setTimeout(() => document.getElementById('pwInput').focus(), 100);
+  pendingDeleteIdx = currentCafeIdx;
+};
+document.getElementById('pwCancel').onclick = closePwModal;
+document.getElementById('pwOverlay').onclick = closePwModal;
+document.getElementById('pwConfirm').onclick = confirmDelete;
+document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmDelete(); });
+
+function closePwModal() {
+  document.getElementById('pwOverlay').classList.remove('open');
+  document.getElementById('pwModal').classList.remove('open');
+  pendingDeleteIdx = -1;
+}
+function confirmDelete() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw !== '5775') {
+    document.getElementById('pwError').textContent = '비밀번호가 틀렸습니다.';
+    document.getElementById('pwInput').select();
+    return;
+  }
+  if (pendingDeleteIdx >= 0 && pendingDeleteIdx < cafes.length) {
+    cafes.splice(pendingDeleteIdx, 1);
+    saveUserCafes();
+    render();
+  }
+  closePwModal();
+  document.getElementById('detailPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── EVENTS ──
+document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; render(); });
+document.getElementById('resetBtn').onclick = () => {
+  activeTags.clear(); activeProvince = ''; activeDistrict = ''; searchQuery = ''; activeFolder = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('provinceSel').value = '';
+  document.getElementById('mobileProvinceSel').value = '';
+  buildDistrictSelector('districtSel','',true);
+  buildDistrictSelector('mobileDistrictSel','',true);
+  updateTagUI(); updateFolderUI(); render();
+};
+document.getElementById('gridViewBtn').onclick = () => {
+  isGridView = true;
+  document.getElementById('gridViewBtn').classList.add('active');
+  document.getElementById('listViewBtn').classList.remove('active'); render();
+};
+document.getElementById('listViewBtn').onclick = () => {
+  isGridView = false;
+  document.getElementById('listViewBtn').classList.add('active');
+  document.getElementById('gridViewBtn').classList.remove('active'); render();
+};
+
+// Mobile drawer
+const overlay = document.getElementById('mobileOverlay');
+const drawer = document.getElementById('mobileDrawer');
+document.getElementById('mobileFilterToggle').onclick = () => { overlay.classList.add('open'); drawer.classList.add('open'); document.body.style.overflow = 'hidden'; };
+overlay.onclick = closeDrawer;
+document.getElementById('drawerApplyBtn').onclick = () => { updateTagUI(); render(); closeDrawer(); };
+document.getElementById('drawerResetBtn').onclick = () => { activeTags.clear(); document.querySelectorAll('.drawer-tag-btn').forEach(b => b.classList.remove('on')); };
+function closeDrawer() { overlay.classList.remove('open'); drawer.classList.remove('open'); document.body.style.overflow = ''; }
+
+// ── ADD CAFE MODAL ──
+const modalOverlay = document.getElementById('modalOverlay');
+const addModal = document.getElementById('addCafeModal');
+const selectedModalTags = new Set();
+let selectedModalFolder = '';
+
+function openModal() {
+  modalOverlay.classList.add('open'); addModal.classList.add('open'); document.body.style.overflow = 'hidden';
+  document.getElementById('inputName').focus();
+}
+function toggleModalFolder(folder) {
+  selectedModalFolder = (selectedModalFolder === folder) ? '' : folder;
+  const btn = document.getElementById('modalFolderBtn_duksung');
+  if (btn) btn.classList.toggle('on', selectedModalFolder === '덕성여대');
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('open'); addModal.classList.remove('open'); document.body.style.overflow = '';
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputProvince').value = '';
+  document.getElementById('inputDistrict').innerHTML = '<option value="">구/동 선택</option>';
+  document.getElementById('inputDistrict').disabled = true;
+  document.getElementById('inputDesc').value = '';
+  document.getElementById('inputInstagram').value = '';
+  document.getElementById('formError').textContent = '';
+  selectedModalTags.clear();
+  selectedModalFolder = '';
+  document.querySelectorAll('.modal-tag-btn').forEach(b => b.classList.remove('on'));
+}
+document.getElementById('addCafeBtn').onclick = openModal;
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalCancel').onclick = closeModal;
+modalOverlay.onclick = closeModal;
+
+document.getElementById('modalSubmit').onclick = () => {
+  const name = document.getElementById('inputName').value.trim();
+  const prov = document.getElementById('inputProvince').value;
+  const dist = document.getElementById('inputDistrict').value;
+  const desc = document.getElementById('inputDesc').value.trim();
+  const instagram = document.getElementById('inputInstagram').value.trim();
+  const errorEl = document.getElementById('formError');
+
+  if (!name) { errorEl.textContent = '카페 이름을 입력해주세요.'; document.getElementById('inputName').focus(); return; }
+  if (!prov) { errorEl.textContent = '지역(시/도)을 선택해주세요.'; document.getElementById('inputProvince').focus(); return; }
+  errorEl.textContent = '';
+
+  const regionLabel = dist ? prov + ' ' + dist : prov;
+  const newCafe = {
+    name, region: regionLabel, province: prov, district: dist || prov,
+    desc: desc || '직접 추가한 카페.',
+    tags: [...selectedModalTags],
+    userAdded: true,
+    instagram: instagram || null,
+    folder: selectedModalFolder || null
+  };
+  cafes.unshift(newCafe);
+  saveUserCafes();
+  updateTagUI();
+  render();
+  closeModal();
+  setTimeout(() => {
+    const firstCard = document.querySelector('.cafe-grid .card');
+    if (firstCard) firstCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+};
+
+// ── NAVER MAP APP DEEP LINK ──
+function openNaverMap(query) {
+  const webUrl = 'https://map.naver.com/v5/search/' + query;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
+  if (isAndroid) {
+    // Android: intent scheme으로 앱 직접 실행, 없으면 웹 fallback
+    const intentUrl = 'intent://search?query=' + query + '&appname=com.cupick.app#Intent;scheme=nmap;package=com.nhn.android.nmap;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+    window.location.href = intentUrl;
+  } else {
+    // iOS 포함 나머지: 유니버설 링크로 바로 이동 (팝업 없음)
+    // 앱 설치 시 iOS가 자동으로 앱으로 라우팅함
+    window.location.href = webUrl;
+  }
+}
+
+// ── FOLDER FILTER ──
+function toggleFolder(folder) {
+  activeFolder = (activeFolder === folder) ? '' : folder;
+  updateFolderUI();
+  render();
+}
+
+function updateFolderUI() {
+  const btn = document.getElementById('folderBtn_duksung');
+  const chip = document.getElementById('mobileFolderChip');
+  if (btn) btn.classList.toggle('on', activeFolder === '덕성여대');
+  if (chip) chip.classList.toggle('on', activeFolder === '덕성여대');
+  // 카운트 업데이트
+  const cnt = cafes.filter(c => c.folder === '덕성여대').length;
+  const el = document.getElementById('folderCount_duksung');
+  if (el) el.textContent = cnt;
+}
+
+// ── INIT ──
+buildProvinceSelectors();
+loadUserCafes();
+updateFolderUI();
+render();
+</script>
+<footer class="site-footer">Created by @shuuuhn</footer>
+</body>
+</html>
